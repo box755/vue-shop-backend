@@ -26,11 +26,14 @@ db.Sequelize = Sequelize
 // 回傳一個sequelize對象，可以操作post表
 db.Post = require('./post.js')(sequelize, Sequelize)
 db.Category = require('./category.js')(sequelize, Sequelize)
+db.Banner = require('./banner.js')(sequelize, Sequelize)
 db.Product = require('./product.js')(sequelize, Sequelize)
 
 // 設定關聯
 db.Category.hasMany(db.Product, { foreignKey: 'categoryId', as: 'goods' });
 db.Product.belongsTo(db.Category, { foreignKey: 'categoryId', as: 'category' });
+db.Banner.belongsTo(db.Category, { foreignKey: 'categoryId', as: 'category' });
+
 
 module.exports = db
 

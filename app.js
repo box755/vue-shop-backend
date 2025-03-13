@@ -43,6 +43,8 @@ app.use(cors({
 
 require('./routes/post.js')(app);
 require('./routes/category.js')(app);
+require('./routes/banner.js')(app);
+
 
 
 

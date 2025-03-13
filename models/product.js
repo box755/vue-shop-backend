@@ -1,7 +1,7 @@
 // product表ORM，建立表映射物件
 module.exports = (sequelize, Sequelize) => {
     //回傳對象
-    const Category = sequelize.define('product', {
+    const Product = sequelize.define('product', {
         id: {
             type: Sequelize.STRING,
             primaryKey: true,
@@ -27,11 +27,19 @@ module.exports = (sequelize, Sequelize) => {
 
         discount: {
             type: Sequelize.STRING,
-        }
+        },
+
+        // 外鍵
+        categoryId: {
+            type: Sequelize.STRING,
+            allowNull: false, // 設定為必填，確保每個產品都有分類
+            references: {
+                model: 'categories', // 這裡要對應 `Category` 表
+                key: 'id',
+            },
+            onDelete: 'CASCADE', // 當分類刪除時，對應產品也刪除
+        },
     })
 
-    // 遞回關係：category有多個category作為子表
-    // category有多個category作為父表 並且都是以parentId關聯彼此
-
-    return Category
+    return Product
 }
