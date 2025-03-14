@@ -39,6 +39,108 @@ exports.getCategories = async (req, res) => {
     }
 };
 
+    exports.getCategoryById = async (req, res) => {
+    try {
+        // 根據id查詢分類，且此分類必須有parentId
+            if(!req.query.id){
+                return res.status(404).json({ code: "0", msg: "未輸入分類id" });
+
+            }
+        const category = await Category.findOne({
+            where: { id: req.query.id },
+            include: [{ model: Category, as: 'parent' }]
+        });
+
+        if (!category) {
+            return res.status(404).json({ code: "0", msg: "分類不存在" });
+        }
+
+        if (!category.parentId) {
+            return res.status(400).json({ code: "0", msg: "此分類沒有上層分類" });
+        }
+
+        const response = {
+            code: "1",
+            msg: "操作成功",
+            result: {
+                id: category.id,
+                name: category.name,
+                picture: category.picture,
+                parentId: category.parentId,
+                parentName: category.parent ? category.parent.name : null,
+            }
+        };
+
+        res.status(200).json(response);
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ code: "0", msg: "系統錯誤" });
+    }
+}
+
+
+exports.getCategoryWithChildren = async (req, res) => {
+    try {
+        const categoryId = req.query.id;
+        if(!categoryId){
+            return res.status(404).json({ code: "0", msg: "未輸入分類id" });
+
+        }
+        // 查找該分類，確保它是頂層分類
+        const category = await Category.findOne({
+            where: { id: categoryId, parentId: null }
+        });
+
+        if (!category) {
+            return res.status(404).json({ code: "0", msg: "分類不存在或不是頂層分類" });
+        }
+
+        // 查找該分類的子分類
+        const children = await Category.findAll({
+            where: { parentId: categoryId },
+            include: [
+                {
+                    model: Product,
+                    as: 'goods',
+                    order: [['orderNum', 'DESC']] // 商品按熱度排序
+                }
+            ]
+        });
+
+        // 返回格式化的數據
+        const response = {
+            code: "1",
+            msg: "操作成功",
+            result: {
+                id: category.id,
+                name: category.name,
+                picture: category.picture,
+                children: children.map(child => formatChildCategory(child))
+            }
+        };
+
+        res.status(200).json(response);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ code: "0", msg: "系統錯誤" });
+    }
+};
+
+function formatChildCategory(child) {
+    return {
+        id: child.id,
+        name: child.name,
+        picture: child.picture,
+        parentId: null,  // 因為是直接的子分類，所以 `parentId` 不返回
+        parentName: null,
+        goods: child.goods.length > 0 ? child.goods.map(good => formatProduct(good)) : null,
+        categories: null,
+        brands: null,
+        saleProperties: null
+    };
+}
 
 function formatCategory(category) {
     return {

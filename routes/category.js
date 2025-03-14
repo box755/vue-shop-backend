@@ -1,4 +1,4 @@
-const { getCategories } = require('../controllers/category');
+const { getCategories, getCategoryById, getCategoryWithChildren} = require('../controllers/category');
 const express = require("express");
 
 
@@ -9,6 +9,8 @@ module.exports = (app) => {
 
     // 將req res交給create方法處理，promise
     router.get('/getCategories', getCategories)
+    router.get('/sub/filter', getCategoryById)
+    router.get('/category', getCategoryWithChildren);
 
 
 
