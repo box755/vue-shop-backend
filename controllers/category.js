@@ -104,7 +104,8 @@ exports.getCategoryWithChildren = async (req, res) => {
                 {
                     model: Product,
                     as: 'goods',
-                    order: [['orderNum', 'DESC']] // 商品按熱度排序
+                    order: [['orderNum', 'DESC']], // 商品按熱度排序
+                    limit: 4 //每個分類最多顯示4個
                 }
             ]
         });
@@ -141,7 +142,7 @@ exports.getAllCategoriesWithGoods = async (req, res) => {
                 },
                 {
                     model: Product, // 查詢分類下的商品
-                    as: 'goods'
+                    as: 'goods',
                 }
             ]
         });
@@ -159,6 +160,66 @@ exports.getAllCategoriesWithGoods = async (req, res) => {
         res.status(500).json({ code: "0", msg: "系統錯誤" });
     }
 };
+
+
+
+exports.getCategoryProducts = async (req, res) => {
+    try {
+        const { categoryId, page = 1, pageSize = 20, sortField = 'publishTime' } = req.body;
+
+        // 定義排序規則
+        const sortMap = {
+            publishTime: ['createdAt', 'DESC'],
+            orderNum: ['orderNum', 'DESC'],
+            evaluateNum: ['evaluateNum', 'DESC']
+        };
+
+        if (!categoryId) {
+            return res.status(400).json({ code: "0", msg: "categoryId 不能為空" });
+        }
+
+        // 驗證 categoryId 是否存在
+        const category = await Category.findByPk(categoryId);
+        if (!category || !category.parentId) {
+            return res.status(400).json({ code: "0", msg: "無效的 categoryId 或此分類無 parentId" });
+        }
+
+        // 獲取商品總數
+        const totalProducts = await Product.count({
+            where: { categoryId }
+        });
+
+        // 計算分頁資訊
+        const totalPages = Math.ceil(totalProducts / pageSize);
+
+        // 查詢符合條件的商品
+        const products = await Product.findAll({
+            where: { categoryId },
+            order: [sortMap[sortField] || ['createdAt', 'DESC']], // 預設按照 `createdAt` 降序排列
+            limit: pageSize,
+            offset: (page - 1) * pageSize
+        });
+
+        // 格式化商品數據
+        const responseData = {
+            code: "1",
+            msg: "操作成功",
+            result: {
+                counts: totalProducts,
+                pageSize: Number(pageSize),
+                pages: totalPages,
+                page: Number(page),
+                items: products.map(formatProduct)
+            }
+        };
+
+        res.status(200).json(responseData);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ code: "0", msg: "系統錯誤" });
+    }
+};
+
 
 function formatCategoryWithGood(category) {
     return {
@@ -226,7 +287,7 @@ function formatProduct(product) {
         desc: product.desc,
         price: product.price,
         picture: product.picture,
-        discount: null, // API 有這個欄位，但目前沒數據，回傳 `null`
-        orderNum: null // API 有這個欄位，但目前沒數據，回傳 `null`
+        discount: product.discount,
+        orderNum: product.orderNum
     };
 }

@@ -12,6 +12,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         picture: {
             type: Sequelize.STRING,
+            allowNull: false,
         },
         desc: {
             type: Sequelize.STRING,
@@ -23,10 +24,16 @@ module.exports = (sequelize, Sequelize) => {
         },
         orderNum:{
             type: Sequelize.STRING,
+            allowNull: true,
         },
 
         discount: {
             type: Sequelize.STRING,
+            allowNull: true,
+        },
+        evaluateNum: {
+            type: Sequelize.STRING,
+            allowNull: true,
         },
 
         // 外鍵
