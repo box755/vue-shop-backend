@@ -1,4 +1,4 @@
-const { getCategories, getCategoryById, getCategoryWithChildren} = require('../controllers/category');
+const { getCategories, getCategoryById, getCategoryWithChildren, getAllCategoriesWithGoods} = require('../controllers/category');
 const express = require("express");
 
 
@@ -11,6 +11,8 @@ module.exports = (app) => {
     router.get('/getCategories', getCategories)
     router.get('/sub/filter', getCategoryById)
     router.get('/category', getCategoryWithChildren);
+    router.get('/homeProducts', getAllCategoriesWithGoods);
+
 
 
 

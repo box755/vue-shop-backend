@@ -16,6 +16,10 @@
             parentId:{
                 type: Sequelize.STRING
             },
+            saleInfo: {
+                type: Sequelize.STRING,
+                allowNull: true
+            }
         })
 
         // 遞回關係：category有多個category作為子表

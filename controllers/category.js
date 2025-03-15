@@ -117,7 +117,7 @@ exports.getCategoryWithChildren = async (req, res) => {
                 id: category.id,
                 name: category.name,
                 picture: category.picture,
-                children: children.map(child => formatChildCategory(child))
+                children: children.map(child => formatCategoryWithChild(child))
             }
         };
 
@@ -128,7 +128,62 @@ exports.getCategoryWithChildren = async (req, res) => {
     }
 };
 
-function formatChildCategory(child) {
+
+exports.getAllCategoriesWithGoods = async (req, res) => {
+    try {
+        // 查詢所有最上層分類，並包含「子分類」和「商品」
+        const categories = await Category.findAll({
+            where: { parentId: null }, // 只查詢最上層分類
+            include: [
+                {
+                    model: Category, // 查詢子分類
+                    as: 'children',
+                },
+                {
+                    model: Product, // 查詢分類下的商品
+                    as: 'goods'
+                }
+            ]
+        });
+
+        // 格式化 JSON 符合 API 輸出格式
+        const response = {
+            code: "1",
+            msg: "操作成功",
+            result: categories.map(category => formatCategoryWithGood(category)) // 遍歷陣列
+        };
+
+        res.status(200).json(response);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ code: "0", msg: "系統錯誤" });
+    }
+};
+
+function formatCategoryWithGood(category) {
+    return {
+        id: category.id,
+        name: category.name,
+        picture: category.picture,
+        saleInfo: category.saleInfo || "大额优惠\r\n等你来拿", // 預設 `saleInfo`
+        children: category.children ? category.children.map(child => formatSubCategoryWithGood(child)) : null,
+        goods: category.goods ? category.goods.map(good => formatProductWithCategory(good)) : null
+    };
+}
+
+function formatSubCategoryWithGood(subCategory) {
+    return {
+        id: subCategory.id,
+        name: subCategory.name,
+        layer: 2,
+        parent: null
+    };
+}
+
+
+
+
+function formatCategoryWithChild(child) {
     return {
         id: child.id,
         name: child.name,
@@ -149,6 +204,17 @@ function formatCategory(category) {
         picture: category.picture,
         children: category.children ? category.children.map(child => formatCategory(child)) : null, // 遞迴處理子分類
         goods: category.goods && category.goods.length > 0 ? category.goods.map(good => formatProduct(good)) : null
+    };
+}
+
+function formatProductWithCategory(product) {
+    return {
+        id: product.id,
+        name: product.name,
+        desc: product.desc,
+        price: product.price,
+        picture: product.picture,
+        orderNum: product.orderNum,
     };
 }
 
