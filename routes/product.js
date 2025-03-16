@@ -1,4 +1,4 @@
-const { getHotProducts, getNewProducts } = require('../controllers/product');
+const { getHotProducts, getNewProducts, getProductDetailById } = require('../controllers/product');
 const express = require("express");
 
 
@@ -10,6 +10,9 @@ module.exports = (app) => {
 
     router.get('/getHotProducts', getHotProducts);
     router.get('/getNewProducts', getNewProducts);
+    router.get('/getNewProducts', getNewProducts);
+    router.get('/getProductDetail', getProductDetailById);
+
 
     app.use('/api/product/', router)
 

@@ -36,7 +36,67 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true,
         },
 
+        oldPrice: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+
+        inventory: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+
+        mainVideos: {
+            type: Sequelize.TEXT, // JSON 格式存取
+            allowNull: true,
+        },
+        videoScale: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+        mainPictures: {
+            type: Sequelize.TEXT, // JSON 格式存取
+            allowNull: true,
+        },
+        salesCount: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+        commentCount: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+        collectCount: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+        details: {
+            type: Sequelize.TEXT, // 存 JSON 格式 (包括規格、商品詳情等)
+            allowNull: true,
+        },
+        isPreSale: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+        spuCode:{
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+        isCollect: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+
         // 外鍵
+
+        brandId: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            references: {
+                model: 'brands',
+                key: 'id',
+            },
+        },
         categoryId: {
             type: Sequelize.STRING,
             allowNull: false, // 設定為必填，確保每個產品都有分類
